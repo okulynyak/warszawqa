@@ -1,0 +1,130 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>WarszawQA</groupId>
+	<artifactId>WarszawQA</artifactId>
+	<version>0.1</version>
+	<name>WarszawQA_SoapUI_Project</name>
+
+	<properties>
+		<encoding>UTF-8</encoding>
+		<project.build.sourceEncoding>${encoding}</project.build.sourceEncoding>
+		<Environment>Webservicex</Environment>
+		<soapuiProject>WarszawQA-soapui-project</soapuiProject>
+		<expectedPath></expectedPath>
+	</properties>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>smartbear-sweden-plugin-repository</id>
+			<url>http://smartbearsoftware.com/repository/maven2/</url>
+        </pluginRepository>
+	</pluginRepositories>
+	
+	<profiles>
+		<profile>
+			<id>WarszawQA_WS_TEST</id>
+			<build>
+				<plugins>
+					<!--install ojdbc-->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-install-plugin</artifactId>
+						<version>2.5.2</version>
+						<executions>
+							<execution>
+								<id>install ojdbc6</id>
+								<phase>generate-resources</phase>
+								<goals>
+									<goal>install-file</goal>
+								</goals>
+								<configuration>
+									<file>ojdbc6.jar</file>
+									<groupId>com.oracle</groupId>
+									<artifactId>ojdbc6</artifactId>
+									<version>11.2.0.3</version>
+									<packaging>jar</packaging>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- run SOAPUI -->
+					<plugin>
+						<groupId>com.smartbear.soapui</groupId>
+						<artifactId>soapui-maven-plugin</artifactId>
+						<version>5.1.0</version>
+						<dependencies>
+							<dependency>
+								<groupId>com.oracle</groupId>
+								<artifactId>ojdbc6</artifactId>
+								<version>11.2.0.3</version>
+							</dependency>
+						</dependencies>
+						<executions>
+							<execution>
+								<id>WarszawQA WS tests start at environment ${Environment}</id>
+								<phase>generate-resources</phase>
+								<goals>
+									<goal>test</goal>
+								</goals>
+								<configuration>
+									<projectFile>${project.basedir}${file.separator}${soapuiProject}.xml</projectFile>
+									<outputFolder>${project.basedir}${file.separator}outputFolder</outputFolder>
+									<junitReport>true</junitReport>
+									<useOutputFolderPerProject>true</useOutputFolderPerProject>
+									<username>xxx</username>
+									<password>xxx</password>
+									<printReport>true</printReport>
+									<exportwAll>true</exportwAll>
+									<failOnError>false</failOnError>
+									<soapuiProperties>
+										<property>
+											<name>soapui.properties.${soapuiProject}</name>
+											<value>${project.basedir}${file.separator}ProjectProperties${file.separator}${Environment}${file.separator}${Environment}.properties</value>
+										</property>
+									</soapuiProperties>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- assert responses-->
+					<plugin>
+						<groupId>org.codehaus.gmavenplus</groupId>
+						<artifactId>gmavenplus-plugin</artifactId>
+						<version>1.5</version>
+						<dependencies>
+							<dependency>
+								<groupId>org.codehaus.groovy</groupId>
+								<artifactId>groovy-all</artifactId>
+								<version>2.4.10</version>
+								<scope>runtime</scope>
+							</dependency>
+						</dependencies>
+						<executions>
+							<execution>
+								<id>WarszawQA WS assert responses at ${Environment}</id>
+								<phase>test</phase>
+								<goals>
+									<goal>execute</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<bindPropertiesToSeparateVariables>false</bindPropertiesToSeparateVariables>
+							<scripts>
+								<script>file:///${project.basedir}${file.separator}Groovy-scripts${file.separator}TestAssertions.groovy</script>
+							</scripts>
+							<properties>
+								<methodsPath>${project.basedir}${file.separator}Methods${file.separator}</methodsPath>
+								<assertionsPath>${project.basedir}${file.separator}Assertions${file.separator}</assertionsPath>
+								<resultPath>${project.basedir}${file.separator}Results${file.separator}</resultPath>
+								<Environment>${Environment}</Environment>
+								<EnvProperties>${project.basedir}${file.separator}ProjectProperties${file.separator}${Environment}${file.separator}${Environment}.properties</EnvProperties>
+							</properties>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

@@ -1,0 +1,7 @@
+***Failed methods***
+
+***Passed methods***
+GetCitiesByCountry
+
+***Methods marked for tests***
+GetCitiesByCountry
